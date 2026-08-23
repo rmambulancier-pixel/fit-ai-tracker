@@ -9,6 +9,19 @@ import androidx.lifecycle.viewModelScope
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+data class WeightRecord(
+    val timestamp: Long,
+    val weight: Float
+)
+
+data class ScanRecord(
+    val timestamp: Long,
+    val result: String
+)
 
 class TrackerViewModel : ViewModel() {
     var rawWeightInput by mutableStateOf("")
@@ -25,6 +38,17 @@ class TrackerViewModel : ViewModel() {
     var isScanning by mutableStateOf(false)
         private set
 
+    var healthConnectAvailable by mutableStateOf(true)
+        private set
+
+    private var _weightHistory by mutableStateOf<List<WeightRecord>>(emptyList())
+    val weightHistory: List<WeightRecord>
+        get() = _weightHistory
+
+    private var _scanHistory by mutableStateOf<List<ScanRecord>>(emptyList())
+    val scanHistory: List<ScanRecord>
+        get() = _scanHistory
+
     private val smoothingFactor = 0.1
 
     private val generativeModel = GenerativeModel(
@@ -40,6 +64,11 @@ class TrackerViewModel : ViewModel() {
         val newWeight = rawWeightInput.replace(",", ".").toDoubleOrNull() ?: return
         lastRawWeight = newWeight
         trendWeight = trendWeight + smoothingFactor * (newWeight - trendWeight)
+        
+        // Add to weight history
+        val newRecord = WeightRecord(System.currentTimeMillis(), newWeight.toFloat())
+        _weightHistory = _weightHistory + newRecord
+        
         rawWeightInput = ""
     }
 
@@ -58,12 +87,24 @@ class TrackerViewModel : ViewModel() {
                         )
                     }
                 )
-                scanResult = response.text ?: "Pas de réponse de Gemini."
+                val result = response.text ?: "Pas de réponse de Gemini."
+                scanResult = result
+                
+                // Add to scan history
+                val scanRecord = ScanRecord(System.currentTimeMillis(), result)
+                _scanHistory = _scanHistory + scanRecord
             } catch (e: Exception) {
                 scanResult = "Erreur : ${e.message}"
             } finally {
                 isScanning = false
             }
+        }
+    }
+
+    companion object {
+        fun formatDate(timestamp: Long): String {
+            val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            return sdf.format(Date(timestamp))
         }
     }
 }
