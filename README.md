@@ -172,18 +172,18 @@ org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3
 ## 🔄 Flux de Données
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────[...]
 │                    OTHER HEALTH APPS                            │
 │  (Fit, Health, Strava, WeWard, Mi Fitness, ICE smart, etc.)     │
-└────────────────────┬──────────────────────────────────────────────┘
+└────────────────────┬───────────────────────────────────────────[...]
                      │
         ┌────────────┴──────────────┐
         ↓                           ↓
     [READ]                      [WRITE]
         ↓                           ↓
-┌─────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────[...]
 │              HEALTH CONNECT (Central Hub)                       │
-└────────────────────┬──────────────────────────────────────────────┘
+└────────────────────┬───────────────────────────────────────────[...]
                      │
         ┌────────────┴──────────────┐
         ↓                           ↓
@@ -219,7 +219,16 @@ org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3
 
 1. Ajouter dans `HealthConnectHelper.kt` :
 ```kotlin
-suspend fun readMyData(context: Context): List<MyRecord> { ... }
+@Suppress("UNCHECKED_CAST")
+suspend fun readMyData(context: Context): List<MyRecord> {
+    val timeRangeFilter = TimeRangeFilter.between(...)
+    val request = ReadRecordsRequest(
+        recordType = MyRecord::class as KClass<Record>,
+        timeRangeFilter = timeRangeFilter
+    ) as ReadRecordsRequest<MyRecord>
+    return client.readRecords(request).records
+}
+
 suspend fun writeMyData(context: Context, value: Double) { ... }
 ```
 
@@ -251,6 +260,12 @@ suspend fun writeMyData(context: Context, value: Double) { ... }
 - ✅ Sync bidirectionnelle automatique
 - ✅ Scanner IA Gemini
 - ✅ Tracking métabolique
+- ✅ Corrections des erreurs de compilation Kotlin (type variance)
+
+### v1.1 (Bug Fixes)
+- ✅ Correction des erreurs de type dans `HealthPermission` avec casts explicites
+- ✅ Correction de `ReadRecordsRequest` avec suppression des avertissements UNCHECKED_CAST
+- ✅ Suppression des imports inutilisés dans `HealthDataSyncManager`
 
 ## 🤝 Contribution
 
@@ -268,6 +283,12 @@ Non spécifiée
 - Redémarrez l'application après avoir accordé les permissions
 - Vérifiez que Health Connect est installé (Android 13+)
 - Utilisez le `ContentProvider` déclaré pour permettre le partage
+
+**Question** : "Erreurs de compilation Kotlin avec Health Connect"
+**Réponse** :
+- Assurez-vous d'utiliser `@Suppress("UNCHECKED_CAST")` pour les casts de type variance
+- Les record types (`WeightRecord`, etc.) doivent être castés en `KClass<Record>` pour `HealthPermission` et `ReadRecordsRequest`
+- Consulter : [Health Connect Type Variance Guide](https://developer.android.com/guide/health-connect/read-write-data)
 
 ---
 
