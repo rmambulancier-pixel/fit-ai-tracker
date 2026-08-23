@@ -41,10 +41,13 @@ class TrackerViewModel : ViewModel() {
 
     private val smoothingFactor = 0.1
 
-    private val generativeModel = GenerativeModel(
-        modelName = "gemini-3.6-flash",
-        apiKey = BuildConfig.GEMINI_API_KEY
-    )
+        private val generativeModel by lazy {
+        GenerativeModel(
+            modelName = "gemini-3.6-flash",
+            apiKey = BuildConfig.GEMINI_API_KEY
+        )
+    }
+
 
     fun onWeightInputChange(value: String) {
         rawWeightInput = value
