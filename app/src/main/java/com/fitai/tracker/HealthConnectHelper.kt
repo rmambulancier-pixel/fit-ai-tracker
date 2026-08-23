@@ -11,27 +11,26 @@ import androidx.health.connect.client.units.Mass
 import androidx.health.connect.client.units.Length
 import androidx.health.connect.client.units.Energy
 import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import kotlin.reflect.KClass
 
 object HealthConnectHelper {
     // Toutes les permissions READ & WRITE
+    @Suppress("UNCHECKED_CAST")
     val permissions = setOf(
-        HealthPermission.getReadPermission(WeightRecord::class),
-        HealthPermission.getWritePermission(WeightRecord::class),
-        HealthPermission.getReadPermission(StepsRecord::class),
-        HealthPermission.getWritePermission(StepsRecord::class),
-        HealthPermission.getReadPermission(HeartRateRecord::class),
-        HealthPermission.getWritePermission(HeartRateRecord::class),
-        HealthPermission.getReadPermission(NutritionRecord::class),
-        HealthPermission.getWritePermission(NutritionRecord::class),
-        HealthPermission.getReadPermission(HydrationRecord::class),
-        HealthPermission.getWritePermission(HydrationRecord::class),
-        HealthPermission.getReadPermission(DistanceRecord::class),
-        HealthPermission.getWritePermission(DistanceRecord::class),
-        HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
-        HealthPermission.getWritePermission(TotalCaloriesBurnedRecord::class),
+        HealthPermission.getReadPermission(WeightRecord::class as KClass<Record>),
+        HealthPermission.getWritePermission(WeightRecord::class as KClass<Record>),
+        HealthPermission.getReadPermission(StepsRecord::class as KClass<Record>),
+        HealthPermission.getWritePermission(StepsRecord::class as KClass<Record>),
+        HealthPermission.getReadPermission(HeartRateRecord::class as KClass<Record>),
+        HealthPermission.getWritePermission(HeartRateRecord::class as KClass<Record>),
+        HealthPermission.getReadPermission(NutritionRecord::class as KClass<Record>),
+        HealthPermission.getWritePermission(NutritionRecord::class as KClass<Record>),
+        HealthPermission.getReadPermission(HydrationRecord::class as KClass<Record>),
+        HealthPermission.getWritePermission(HydrationRecord::class as KClass<Record>),
+        HealthPermission.getReadPermission(DistanceRecord::class as KClass<Record>),
+        HealthPermission.getWritePermission(DistanceRecord::class as KClass<Record>),
+        HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class as KClass<Record>),
+        HealthPermission.getWritePermission(TotalCaloriesBurnedRecord::class as KClass<Record>),
     )
 
     fun isAvailable(context: Context): Boolean {
