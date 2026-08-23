@@ -64,6 +64,13 @@ implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 
     // Google Generative AI (Gemini SDK)
     implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
-implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    
+    // Room Database for local sync
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    
+    // Coroutines for async operations
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 }
  
