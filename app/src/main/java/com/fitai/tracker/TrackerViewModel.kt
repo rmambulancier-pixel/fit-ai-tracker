@@ -13,16 +13,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-data class WeightRecord(
-    val timestamp: Long,
-    val weight: Float
-)
-
-data class ScanRecord(
-    val timestamp: Long,
-    val result: String
-)
-
 class TrackerViewModel : ViewModel() {
     var rawWeightInput by mutableStateOf("")
         private set
@@ -66,7 +56,7 @@ class TrackerViewModel : ViewModel() {
         trendWeight = trendWeight + smoothingFactor * (newWeight - trendWeight)
         
         // Add to weight history
-        val newRecord = WeightRecord(System.currentTimeMillis(), newWeight.toFloat())
+        val newRecord = WeightRecord(System.currentTimeMillis(), newWeight)
         _weightHistory = _weightHistory + newRecord
         
         rawWeightInput = ""
