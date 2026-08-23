@@ -11,8 +11,7 @@ import androidx.health.connect.client.units.Mass
 import androidx.health.connect.client.units.Length
 import androidx.health.connect.client.units.Energy
 import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
+import kotlin.reflect.KClass
 
 object HealthConnectHelper {
     // Toutes les permissions READ & WRITE
@@ -112,10 +111,11 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
+            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
-                recordType = WeightRecord::class,
+                recordType = WeightRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
-            )
+            ) as ReadRecordsRequest<WeightRecord>
             client.readRecords(request).records
         } catch (e: Exception) {
             emptyList()
@@ -129,10 +129,11 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
+            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
-                recordType = StepsRecord::class,
+                recordType = StepsRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
-            )
+            ) as ReadRecordsRequest<StepsRecord>
             client.readRecords(request).records
         } catch (e: Exception) {
             emptyList()
@@ -146,10 +147,11 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
+            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
-                recordType = HeartRateRecord::class,
+                recordType = HeartRateRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
-            )
+            ) as ReadRecordsRequest<HeartRateRecord>
             client.readRecords(request).records
         } catch (e: Exception) {
             emptyList()
@@ -163,10 +165,11 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
+            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
-                recordType = TotalCaloriesBurnedRecord::class,
+                recordType = TotalCaloriesBurnedRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
-            )
+            ) as ReadRecordsRequest<TotalCaloriesBurnedRecord>
             client.readRecords(request).records
         } catch (e: Exception) {
             emptyList()
@@ -180,10 +183,11 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
+            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
-                recordType = DistanceRecord::class,
+                recordType = DistanceRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
-            )
+            ) as ReadRecordsRequest<DistanceRecord>
             client.readRecords(request).records
         } catch (e: Exception) {
             emptyList()
@@ -197,10 +201,11 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
+            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
-                recordType = NutritionRecord::class,
+                recordType = NutritionRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
-            )
+            ) as ReadRecordsRequest<NutritionRecord>
             client.readRecords(request).records
         } catch (e: Exception) {
             emptyList()
@@ -214,10 +219,11 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
+            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
-                recordType = HydrationRecord::class,
+                recordType = HydrationRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
-            )
+            ) as ReadRecordsRequest<HydrationRecord>
             client.readRecords(request).records
         } catch (e: Exception) {
             emptyList()
