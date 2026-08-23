@@ -1,9 +1,12 @@
 package com.fitai.tracker
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fitai.tracker.ui.theme.FitAiTheme
 
@@ -35,6 +39,20 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
     val context = LocalContext.current
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        if (bitmap != null) {
+            viewModel.scanMeal(bitmap)
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) cameraLauncher.launch(null)
+    }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Fit AI Metabolic Engine") }) }
@@ -80,15 +98,31 @@ fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
             item {
                 Button(
                     onClick = {
-                        Toast.makeText(
-                            context,
-                            "Scan Gemini pas encore branché — il faudra une clé API Gemini",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        val granted = ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.CAMERA
+                        ) == PackageManager.PERMISSION_GRANTED
+                        if (granted) {
+                            cameraLauncher.launch(null)
+                        } else {
+                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !viewModel.isScanning
                 ) {
-                    Text("📷 Scanner repas / boisson (Gemini Pro)")
+                    Text(if (viewModel.isScanning) "Analyse en cours…" else "📷 Scanner repas / boisson (Gemini Pro)")
+                }
+            }
+
+            viewModel.scanResult?.let { result ->
+                item {
+                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text("Résultat du scan", style = MaterialTheme.typography.titleMedium)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(result)
+                        }
+                    }
                 }
             }
         }
