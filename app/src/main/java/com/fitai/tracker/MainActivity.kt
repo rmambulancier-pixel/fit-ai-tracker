@@ -44,7 +44,11 @@ fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { /* résultat ignoré : si refusé, simplement pas de notification */ }
+    ) { }
+
+    val healthConnectPermissionLauncher = rememberLauncherForActivityResult(
+        HealthConnectHelper.requestPermissionsContract()
+    ) { }
 
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -89,7 +93,7 @@ fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Métabolisme en direct", style = MaterialTheme.typography.titleMedium)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Dépense réelle (TDEE) : ${viewModel.estimatedTDEE} kcal/j")
+                        Text("Dépense estimée (TDEE) : ${viewModel.estimatedTDEE} kcal/j")
                         Text("Poids lissé (Trend) : ${"%.1f".format(viewModel.trendWeight)} kg")
                         Text("Dernière pesée brute : ${viewModel.lastRawWeight} kg")
                     }
@@ -113,6 +117,31 @@ fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("Enregistrer la pesée")
+                        }
+                        if (viewModel.healthConnectAvailable) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedButton(
+                                onClick = {
+                                    healthConnectPermissionLauncher.launch(HealthConnectHelper.permissions)
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Autoriser Health Connect")
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (viewModel.weightHistory.isNotEmpty()) {
+                item {
+                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text("Historique des pesées", style = MaterialTheme.typography.titleMedium)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            viewModel.weightHistory.takeLast(5).reversed().forEach { record ->
+                                Text("${TrackerViewModel.formatDate(record.timestamp)} — ${record.weight} kg")
+                            }
                         }
                     }
                 }
@@ -148,6 +177,24 @@ fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
                     }
                 }
             }
+
+            if (viewModel.scanHistory.size > 1) {
+                item {
+                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text("Historique des scans", style = MaterialTheme.typography.titleMedium)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            viewModel.scanHistory.dropLast(1).takeLast(3).reversed().forEach { record ->
+                                Text(
+                                    "${TrackerViewModel.formatDate(record.timestamp)} — ${record.result.take(80)}",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
-}
+} 
