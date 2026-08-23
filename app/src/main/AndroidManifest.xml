@@ -4,7 +4,8 @@
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
         <intent>
-            <action android:name="android.health.ACTION_SHOW_HEALTH_CONNECT" />
+            <action android:name="androidx.health.connect.client.action.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+
         </intent>
     </queries>
 
