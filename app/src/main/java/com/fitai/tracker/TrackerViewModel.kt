@@ -40,6 +40,10 @@ class TrackerViewModel : ViewModel() {
         get() = _scanHistory
 
     private val smoothingFactor = 0.1
+    fun onHealthPermissionsResult(grantedPermissions: Set<String>) {
+        // Callback sécurisé pour le résultat des permissions Health Connect
+        // Tu peux ajouter ici une logique métier plus tard (sync, état UI, etc.)
+    }
 
         private val generativeModel by lazy {
         GenerativeModel(
