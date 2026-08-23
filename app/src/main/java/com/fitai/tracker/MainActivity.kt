@@ -1,202 +1,106 @@
 package com.fitai.tracker
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.fitai.tracker.ui.theme.FitAiTheme
+import android.graphics.Bitmap
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.content
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        NotificationHelper.createChannel(this)
-        setContent {
-            FitAiTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    TrackerDashboard()
-                }
-            }
-        }
-    }
-}
+class TrackerViewModel : ViewModel() {
+    var rawWeightInput by mutableStateOf("")
+        private set
+    var trendWeight by mutableStateOf(82.1)
+        private set
+    var lastRawWeight by mutableStateOf(82.4)
+        private set
+    var estimatedTDEE by mutableStateOf(2450)
+        private set
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
-    val context = LocalContext.current
+    var scanResult by mutableStateOf<String?>(null)
+        private set
+    var isScanning by mutableStateOf(false)
+        private set
 
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { }
+    var healthConnectAvailable by mutableStateOf(true)
+        private set
 
-    val healthConnectPermissionLauncher = rememberLauncherForActivityResult(
-        HealthConnectHelper.requestPermissionsContract()
-    ) { grantedPermissions ->
-        viewModel.onHealthPermissionsResult(grantedPermissions)
+    private var _weightHistory by mutableStateOf<List<WeightRecord>>(emptyList())
+    val weightHistory: List<WeightRecord>
+        get() = _weightHistory
+
+    private var _scanHistory by mutableStateOf<List<ScanRecord>>(emptyList())
+    val scanHistory: List<ScanRecord>
+        get() = _scanHistory
+
+    private val smoothingFactor = 0.1
+
+    private val generativeModel by lazy {
+        GenerativeModel(
+            modelName = "gemini-3.6-flash",
+            apiKey = BuildConfig.GEMINI_API_KEY
+        )
     }
 
-    LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val granted = ContextCompat.checkSelfPermission(
-                context, Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-            if (!granted) {
-                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
+    fun onWeightInputChange(value: String) {
+        rawWeightInput = value
     }
 
-    LaunchedEffect(viewModel.scanResult) {
-        viewModel.scanResult?.let { result ->
-            NotificationHelper.showScanResult(context, result)
-        }
+    fun logWeight() {
+        val newWeight = rawWeightInput.replace(",", ".").toDoubleOrNull() ?: return
+        lastRawWeight = newWeight
+        trendWeight = trendWeight + smoothingFactor * (newWeight - trendWeight)
+        
+        val newRecord = WeightRecord(System.currentTimeMillis(), newWeight)
+        _weightHistory = _weightHistory + newRecord
+        
+        rawWeightInput = ""
     }
 
-    val cameraLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.TakePicturePreview()
-    ) { bitmap ->
-        if (bitmap != null) {
-            viewModel.scanMeal(bitmap)
-        }
+    fun onHealthPermissionsResult(grantedPermissions: Set<String>) {
+        // Callback sécurisé pour le résultat des permissions Health Connect
+        // Tu peux ajouter ici une logique métier plus tard (sync, état UI, etc.)
     }
 
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (granted) cameraLauncher.launch(null)
-    }
-
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Fit AI Metabolic Engine") }) }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier.padding(padding).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Métabolisme en direct", style = MaterialTheme.typography.titleMedium)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("Dépense estimée (TDEE) : ${viewModel.estimatedTDEE} kcal/j")
-                        Text("Poids lissé (Trend) : ${"%.1f".format(viewModel.trendWeight)} kg")
-                        Text("Dernière pesée brute : ${viewModel.lastRawWeight} kg")
-                    }
-                }
-            }
-
-            item {
-                Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Ajouter une pesée", style = MaterialTheme.typography.titleMedium)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = viewModel.rawWeightInput,
-                            onValueChange = { viewModel.onWeightInputChange(it) },
-                            label = { Text("Poids du jour (kg)") },
-                            modifier = Modifier.fillMaxWidth()
+    fun scanMeal(bitmap: Bitmap) {
+        isScanning = true
+        scanResult = null
+        viewModelScope.launch {
+            try {
+                val response = generativeModel.generateContent(
+                    content {
+                        image(bitmap)
+                        text(
+                            "Identifie ce repas ou cette boisson. Donne en français, " +
+                            "de façon concise : le nom du plat, une estimation des calories, " +
+                            "et la répartition protéines/glucides/lipides."
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(
-                            onClick = { viewModel.logWeight() },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Enregistrer la pesée")
-                        }
-                        if (viewModel.healthConnectAvailable) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            OutlinedButton(
-                                onClick = {
-                                    healthConnectPermissionLauncher.launch(HealthConnectHelper.permissions)
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text("Autoriser Health Connect")
-                            }
-                        }
                     }
-                }
-            }
-
-            if (viewModel.weightHistory.isNotEmpty()) {
-                item {
-                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Historique des pesées", style = MaterialTheme.typography.titleMedium)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            viewModel.weightHistory.takeLast(5).reversed().forEach { record ->
-                                Text("${TrackerViewModel.formatDate(record.timestamp)} — ${record.weight} kg")
-                            }
-                        }
-                    }
-                }
-            }
-
-            item {
-                Button(
-                    onClick = {
-                        val granted = ContextCompat.checkSelfPermission(
-                            context, Manifest.permission.CAMERA
-                        ) == PackageManager.PERMISSION_GRANTED
-                        if (granted) {
-                            cameraLauncher.launch(null)
-                        } else {
-                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !viewModel.isScanning
-                ) {
-                    Text(if (viewModel.isScanning) "Analyse en cours…" else "📷 Scanner repas / boisson (Gemini Pro)")
-                }
-            }
-
-            viewModel.scanResult?.let { result ->
-                item {
-                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Résultat du scan", style = MaterialTheme.typography.titleMedium)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(result)
-                        }
-                    }
-                }
-            }
-
-            if (viewModel.scanHistory.size > 1) {
-                item {
-                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp)) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Historique des scans", style = MaterialTheme.typography.titleMedium)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            viewModel.scanHistory.dropLast(1).takeLast(3).reversed().forEach { record ->
-                                Text(
-                                    "${TrackerViewModel.formatDate(record.timestamp)} — ${record.result.take(80)}",
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                            }
-                        }
-                    }
-                }
+                )
+                val result = response.text ?: "Pas de réponse de Gemini."
+                scanResult = result
+                
+                val scanRecord = ScanRecord(System.currentTimeMillis(), result)
+                _scanHistory = _scanHistory + scanRecord
+            } catch (e: Exception) {
+                scanResult = "Erreur : ${e.message}"
+            } finally {
+                isScanning = false
             }
         }
     }
+
+    companion object {
+        fun formatDate(timestamp: Long): String {
+            val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            return sdf.format(Date(timestamp))
+        }
+    }
 }
+ 
