@@ -4,8 +4,7 @@
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
         <intent>
-            <action android:name="androidx.health.connect.client.action.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-
+            <action android:name="android.health.ACTION_SHOW_HEALTH_CONNECT" />
         </intent>
     </queries>
 
@@ -36,6 +35,10 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.NoActionBar">
 
+        <meta-data
+            android:name="health_permissions"
+            android:resource="@array/health_permissions" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -47,13 +50,7 @@
             <intent-filter>
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
             </intent-filter>
-
-            <!-- Liaison obligatoire du fichier de permissions -->
-            <meta-data
-                android:name="health_permissions"
-                android:resource="@array/health_permissions" />
         </activity>
 
     </application>
 </manifest>
- 
