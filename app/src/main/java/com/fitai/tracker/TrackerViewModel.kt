@@ -40,18 +40,13 @@ class TrackerViewModel : ViewModel() {
         get() = _scanHistory
 
     private val smoothingFactor = 0.1
-    fun onHealthPermissionsResult(grantedPermissions: Set<String>) {
-        // Callback sécurisé pour le résultat des permissions Health Connect
-        // Tu peux ajouter ici une logique métier plus tard (sync, état UI, etc.)
-    }
 
-        private val generativeModel by lazy {
+    private val generativeModel by lazy {
         GenerativeModel(
             modelName = "gemini-3.6-flash",
             apiKey = BuildConfig.GEMINI_API_KEY
         )
     }
-
 
     fun onWeightInputChange(value: String) {
         rawWeightInput = value
@@ -62,11 +57,15 @@ class TrackerViewModel : ViewModel() {
         lastRawWeight = newWeight
         trendWeight = trendWeight + smoothingFactor * (newWeight - trendWeight)
         
-        // Add to weight history
         val newRecord = WeightRecord(System.currentTimeMillis(), newWeight)
         _weightHistory = _weightHistory + newRecord
         
         rawWeightInput = ""
+    }
+
+    fun onHealthPermissionsResult(grantedPermissions: Set<String>) {
+        // Callback sécurisé pour le résultat des permissions Health Connect
+        // Tu peux ajouter ici une logique métier plus tard (sync, état UI, etc.)
     }
 
     fun scanMeal(bitmap: Bitmap) {
@@ -87,7 +86,6 @@ class TrackerViewModel : ViewModel() {
                 val result = response.text ?: "Pas de réponse de Gemini."
                 scanResult = result
                 
-                // Add to scan history
                 val scanRecord = ScanRecord(System.currentTimeMillis(), result)
                 _scanHistory = _scanHistory + scanRecord
             } catch (e: Exception) {
