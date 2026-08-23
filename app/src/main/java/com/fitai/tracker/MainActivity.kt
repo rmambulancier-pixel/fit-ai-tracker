@@ -42,9 +42,13 @@ class MainActivity : ComponentActivity() {
 fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
     val context = LocalContext.current
 
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { }
+    val healthConnectPermissionLauncher = rememberLauncherForActivityResult(
+    HealthConnectHelper.requestPermissionsContract()
+) { grantedPermissions ->
+    // Mettre à jour l'état de l'UI selon le résultat
+    viewModel.onHealthPermissionsResult(grantedPermissions)
+}
+
 
     val healthConnectPermissionLauncher = rememberLauncherForActivityResult(
         HealthConnectHelper.requestPermissionsContract()
