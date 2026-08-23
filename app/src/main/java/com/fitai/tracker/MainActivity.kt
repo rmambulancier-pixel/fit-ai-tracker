@@ -2,6 +2,7 @@ package com.fitai.tracker
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -22,6 +23,7 @@ import com.fitai.tracker.ui.theme.FitAiTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        NotificationHelper.createChannel(this)
         setContent {
             FitAiTheme {
                 Surface(
@@ -40,6 +42,27 @@ class MainActivity : ComponentActivity() {
 fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
     val context = LocalContext.current
 
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* résultat ignoré : si refusé, simplement pas de notification */ }
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val granted = ContextCompat.checkSelfPermission(
+                context, Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+            if (!granted) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    LaunchedEffect(viewModel.scanResult) {
+        viewModel.scanResult?.let { result ->
+            NotificationHelper.showScanResult(context, result)
+        }
+    }
+
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicturePreview()
     ) { bitmap ->
@@ -48,7 +71,7 @@ fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
         }
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) cameraLauncher.launch(null)
@@ -104,7 +127,7 @@ fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
                         if (granted) {
                             cameraLauncher.launch(null)
                         } else {
-                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -127,4 +150,4 @@ fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
             }
         }
     }
-} 
+}
