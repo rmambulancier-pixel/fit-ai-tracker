@@ -14,8 +14,11 @@ plugins {
 android {
     namespace = "com.fitai.tracker"
     compileSdk = 35
-
+buildFeatures {
+        buildConfig = true
+    }
     defaultConfig {
+buildConfigField("String", "GEMINI_API_KEY", "\"${localProperties.getProperty("GEMINI_API_KEY") ?: ""}\"")
         applicationId = "com.fitai.tracker"
         minSdk = 28
         targetSdk = 35
@@ -45,6 +48,7 @@ android {
 }
 
 dependencies {
+implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.1")
     implementation("androidx.activity:activity-compose:1.9.0")
