@@ -42,17 +42,15 @@ class MainActivity : ComponentActivity() {
 fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
     val context = LocalContext.current
 
-    val healthConnectPermissionLauncher = rememberLauncherForActivityResult(
-    HealthConnectHelper.requestPermissionsContract()
-) { grantedPermissions ->
-    // Mettre à jour l'état de l'UI selon le résultat
-    viewModel.onHealthPermissionsResult(grantedPermissions)
-}
-
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
 
     val healthConnectPermissionLauncher = rememberLauncherForActivityResult(
         HealthConnectHelper.requestPermissionsContract()
-    ) { }
+    ) { grantedPermissions ->
+        viewModel.onHealthPermissionsResult(grantedPermissions)
+    }
 
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -201,4 +199,4 @@ fun TrackerDashboard(viewModel: TrackerViewModel = viewModel()) {
             }
         }
     }
-} 
+}
