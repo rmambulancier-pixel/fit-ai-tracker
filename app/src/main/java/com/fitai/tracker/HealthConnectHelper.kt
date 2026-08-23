@@ -11,6 +11,8 @@ import androidx.health.connect.client.units.Mass
 import androidx.health.connect.client.units.Length
 import androidx.health.connect.client.units.Energy
 import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import kotlin.reflect.KClass
 
 object HealthConnectHelper {
@@ -104,6 +106,7 @@ object HealthConnectHelper {
 
     // ==================== READ OPERATIONS ====================
 
+    @Suppress("UNCHECKED_CAST")
     suspend fun readWeightRecords(context: Context, hoursBack: Int = 24): List<WeightRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
@@ -111,7 +114,6 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
-            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
                 recordType = WeightRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
@@ -122,6 +124,7 @@ object HealthConnectHelper {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     suspend fun readStepsRecords(context: Context, hoursBack: Int = 24): List<StepsRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
@@ -129,7 +132,6 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
-            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
                 recordType = StepsRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
@@ -140,6 +142,7 @@ object HealthConnectHelper {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     suspend fun readHeartRateRecords(context: Context, hoursBack: Int = 24): List<HeartRateRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
@@ -147,7 +150,6 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
-            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
                 recordType = HeartRateRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
@@ -158,6 +160,7 @@ object HealthConnectHelper {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     suspend fun readCaloriesRecords(context: Context, hoursBack: Int = 24): List<TotalCaloriesBurnedRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
@@ -165,7 +168,6 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
-            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
                 recordType = TotalCaloriesBurnedRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
@@ -176,6 +178,7 @@ object HealthConnectHelper {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     suspend fun readDistanceRecords(context: Context, hoursBack: Int = 24): List<DistanceRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
@@ -183,7 +186,6 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
-            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
                 recordType = DistanceRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
@@ -194,6 +196,7 @@ object HealthConnectHelper {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     suspend fun readNutritionRecords(context: Context, hoursBack: Int = 24): List<NutritionRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
@@ -201,7 +204,6 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
-            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
                 recordType = NutritionRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
@@ -212,6 +214,7 @@ object HealthConnectHelper {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     suspend fun readHydrationRecords(context: Context, hoursBack: Int = 24): List<HydrationRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
@@ -219,7 +222,6 @@ object HealthConnectHelper {
                 Instant.now().minusSeconds((hoursBack * 3600).toLong()),
                 Instant.now()
             )
-            @Suppress("UNCHECKED_CAST")
             val request = ReadRecordsRequest(
                 recordType = HydrationRecord::class as KClass<Record>,
                 timeRangeFilter = timeRangeFilter
