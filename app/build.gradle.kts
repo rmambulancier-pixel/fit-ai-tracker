@@ -64,5 +64,6 @@ implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 
     // Google Generative AI (Gemini SDK)
     implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
+implementation("androidx.datastore:datastore-preferences:1.1.1")
 }
  
