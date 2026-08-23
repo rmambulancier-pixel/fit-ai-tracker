@@ -99,8 +99,7 @@ object HealthConnectHelper {
     suspend fun readWeightRecords(context: Context, hoursBack: Int = 24): List<WeightRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
-            val request = ReadRecordsRequest(
-                recordType = WeightRecord::class,
+            val request = ReadRecordsRequest<WeightRecord>(
                 timeRangeFilter = TimeRangeFilter.between(
                     Instant.now().minusSeconds((hoursBack * 3600).toLong()), Instant.now()
                 )
@@ -112,8 +111,7 @@ object HealthConnectHelper {
     suspend fun readStepsRecords(context: Context, hoursBack: Int = 24): List<StepsRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
-            val request = ReadRecordsRequest(
-                recordType = StepsRecord::class,
+            val request = ReadRecordsRequest<StepsRecord>(
                 timeRangeFilter = TimeRangeFilter.between(
                     Instant.now().minusSeconds((hoursBack * 3600).toLong()), Instant.now()
                 )
@@ -125,8 +123,7 @@ object HealthConnectHelper {
     suspend fun readHeartRateRecords(context: Context, hoursBack: Int = 24): List<HeartRateRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
-            val request = ReadRecordsRequest(
-                recordType = HeartRateRecord::class,
+            val request = ReadRecordsRequest<HeartRateRecord>(
                 timeRangeFilter = TimeRangeFilter.between(
                     Instant.now().minusSeconds((hoursBack * 3600).toLong()), Instant.now()
                 )
@@ -138,8 +135,7 @@ object HealthConnectHelper {
     suspend fun readCaloriesRecords(context: Context, hoursBack: Int = 24): List<TotalCaloriesBurnedRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
-            val request = ReadRecordsRequest(
-                recordType = TotalCaloriesBurnedRecord::class,
+            val request = ReadRecordsRequest<TotalCaloriesBurnedRecord>(
                 timeRangeFilter = TimeRangeFilter.between(
                     Instant.now().minusSeconds((hoursBack * 3600).toLong()), Instant.now()
                 )
@@ -151,8 +147,7 @@ object HealthConnectHelper {
     suspend fun readDistanceRecords(context: Context, hoursBack: Int = 24): List<DistanceRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
-            val request = ReadRecordsRequest(
-                recordType = DistanceRecord::class,
+            val request = ReadRecordsRequest<DistanceRecord>(
                 timeRangeFilter = TimeRangeFilter.between(
                     Instant.now().minusSeconds((hoursBack * 3600).toLong()), Instant.now()
                 )
@@ -164,8 +159,7 @@ object HealthConnectHelper {
     suspend fun readNutritionRecords(context: Context, hoursBack: Int = 24): List<NutritionRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
-            val request = ReadRecordsRequest(
-                recordType = NutritionRecord::class,
+            val request = ReadRecordsRequest<NutritionRecord>(
                 timeRangeFilter = TimeRangeFilter.between(
                     Instant.now().minusSeconds((hoursBack * 3600).toLong()), Instant.now()
                 )
@@ -177,8 +171,7 @@ object HealthConnectHelper {
     suspend fun readHydrationRecords(context: Context, hoursBack: Int = 24): List<HydrationRecord> {
         val client = getClient(context) ?: return emptyList()
         return try {
-            val request = ReadRecordsRequest(
-                recordType = HydrationRecord::class,
+            val request = ReadRecordsRequest<HydrationRecord>(
                 timeRangeFilter = TimeRangeFilter.between(
                     Instant.now().minusSeconds((hoursBack * 3600).toLong()), Instant.now()
                 )
@@ -189,3 +182,4 @@ object HealthConnectHelper {
 
     fun requestPermissionsContract() = PermissionController.createRequestPermissionResultContract()
 }
+ 
