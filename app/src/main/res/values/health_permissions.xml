@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <array name="health_permissions">
+    <string-array name="health_permissions">
         <item>android.permission.health.READ_WEIGHT</item>
         <item>android.permission.health.WRITE_WEIGHT</item>
         <item>android.permission.health.READ_STEPS</item>
@@ -15,5 +15,5 @@
         <item>android.permission.health.WRITE_DISTANCE</item>
         <item>android.permission.health.READ_TOTAL_CALORIES_BURNED</item>
         <item>android.permission.health.WRITE_TOTAL_CALORIES_BURNED</item>
-    </array>
+    </string-array>
 </resources>
